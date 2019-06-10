@@ -5,13 +5,12 @@ from warnings import warn
 import torch
 import torchvision
 
-from fastprogress import master_bar, progress_bar
-
 from ..logging.logger import Logger
 from ..losses.loss import DiscriminatorLoss, GeneratorLoss
 from ..models.model import Discriminator, Generator
 
 __all__ = ["BaseTrainer"]
+
 
 class BaseTrainer(object):
     r"""Base Trainer for TorchGANs.
@@ -392,18 +391,12 @@ class BaseTrainer(object):
         for name in self.optimizer_names:
             getattr(self, name).zero_grad()
 
-        mb_iter = master_bar(range(self.start_epoch, self.epochs))
-        for epoch in mb_iter:
-
-            mb_iter.first_bar.comment = f'Training Progress'
+        for epoch in range(self.start_epoch, self.epochs):
 
             for model in self.model_names:
                 getattr(self, model).train()
 
-            for pb_iter, data in zip(progress_bar(range(len(data_loader)), parent=mb_iter), data_loader):
-
-                mb_iter.child.comment = f'Epoch {epoch+1} Progress'
-
+            for data in data_loader:
                 if type(data) is tuple or type(data) is list:
                     self.real_inputs = data[0].to(self.device)
                     self.labels = data[1].to(self.device)
