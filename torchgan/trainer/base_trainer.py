@@ -13,7 +13,6 @@ from ..models.model import Discriminator, Generator
 
 __all__ = ["BaseTrainer"]
 
-
 class BaseTrainer(object):
     r"""Base Trainer for TorchGANs.
 
@@ -393,17 +392,17 @@ class BaseTrainer(object):
         for name in self.optimizer_names:
             getattr(self, name).zero_grad()
 
-        master_bar_iter = master_bar(range(self.start_epoch, self.epochs))
-        for epoch in master_bar_iter:
+        mb_iter = master_bar(range(self.start_epoch, self.epochs))
+        for epoch in mb_iter:
 
-            master_bar_iter.first_bar.comment = f'Training Progress'
+            mb_iter.first_bar.comment = f'Training Progress'
 
             for model in self.model_names:
                 getattr(self, model).train()
 
-            for progress_bar_iter, data in zip(progress_bar(range(len(data_loader)), parent=master_bar_iter), data_loader):
+            for pb_iter, data in zip(progress_bar(range(len(data_loader)), parent=mb_iter), data_loader):
 
-                master_bar_iter.child.comment = f'Epoch {epoch+1} Progress'
+                mb_iter.child.comment = f'Epoch {epoch+1} Progress'
 
                 if type(data) is tuple or type(data) is list:
                     self.real_inputs = data[0].to(self.device)
@@ -420,7 +419,6 @@ class BaseTrainer(object):
                 self.loss_information["discriminator_iters"] += dis_iter
 
                 self.logger.run_mid_epoch(self)
-
 
             if "save_items" in kwargs:
                 self.save_model(epoch, kwargs["save_items"])
